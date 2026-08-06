@@ -10,7 +10,7 @@ on:
 jobs:
   build-ios-ipa:
     name: Build & Package iOS IPA
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout Repository
@@ -20,7 +20,7 @@ jobs:
 
       - name: Select Xcode Version
         run: |
-          sudo xcode-select -switch /Applications/Xcode.app
+          sudo xcode-select -switch /Applications/Xcode_15.4.app || sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
 
       - name: Setup Build Directory & Run CMake
