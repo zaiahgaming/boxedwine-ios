@@ -1,0 +1,10 @@
+build/
+build-ios/
+build-linux/
+*.o
+*.a
+*.so
+*.dylib
+*.ipa
+.DS_Store
+Boxedwine/
