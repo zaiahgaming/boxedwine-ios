@@ -154,6 +154,8 @@ target_compile_definitions(BoxedwineGame PRIVATE
     BOXEDWINE_DISABLE_UI         # No imgui — our UIKit is the frontend
     BOXEDWINE_IOS                # Our own iOS marker
     BOXEDWINE_OPENGL_OSMESA      # Software OpenGL via mesa
+    GLAPI=extern                 # Fix missing GLAPI on iOS
+    GLAPIENTRY=                  # Fix missing GLAPIENTRY on iOS
     BOXEDWINE_CORE_AUDIO         # CoreAudio on iOS
     ASMJIT_STATIC
     ASMJIT_NO_X86                # ARM64 only
