@@ -28,6 +28,10 @@ jobs:
           git clone --depth=1 https://github.com/danoon2/Boxedwine.git Boxedwine
           echo "Boxedwine cloned. Source file count:"
           find Boxedwine/source -name "*.cpp" | wc -l
+          
+          # Patch SDL2: remove -Werror that breaks its own iOS source files
+          sed -i '' 's/-Werror=declaration-after-statement/-Wno-error=declaration-after-statement/g' Boxedwine/lib/sdl2/CMakeLists.txt
+          echo "SDL2 patched: removed -Werror"
 
       - name: Generate Xcode Project via CMake
         run: |
