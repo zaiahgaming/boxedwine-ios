@@ -9,6 +9,10 @@
 #include <pthread.h>
 #include <mach/mach.h>
 #include <mach/vm_map.h>
+#include <libkern/OSCacheControl.h>
+
+// Forward declaration / dlsym declaration for iOS pthread_jit_write_protect_np
+extern void pthread_jit_write_protect_np(int enabled) __attribute__((weak_import));
 #endif
 
 static int g_jit_initialized = 0;
@@ -31,7 +35,6 @@ iOSJITPage* iOS_JIT_AllocatePage(size_t size) {
     page->is_dual_mapped = 0;
     
 #if defined(MAP_JIT)
-    // Allocate W^X executable memory page using Apple MAP_JIT flag
     void* ptr = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANON | MAP_PRIVATE | MAP_JIT, -1, 0);
     if (ptr != MAP_FAILED) {
         page->rw_buffer = ptr;
@@ -41,7 +44,6 @@ iOSJITPage* iOS_JIT_AllocatePage(size_t size) {
     }
 #endif
 
-    // Fallback: Dual-mapped W^X memory page allocation via mach_vm_remap
     void* rw_ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
     if (rw_ptr == MAP_FAILED) {
         free(page);
@@ -59,18 +61,20 @@ iOSJITPage* iOS_JIT_AllocatePage(size_t size) {
 int iOS_JIT_EmitCode(iOSJITPage* page, const uint8_t* code_bytes, size_t length) {
     if (!page || !code_bytes || length > page->size) return -1;
     
-#if defined(__APPLE__) && defined(__aarch64__) && defined(MAP_JIT)
-    // Toggle JIT write protection OFF (Allow writing machine instructions)
-    pthread_jit_write_protect_np(0);
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (pthread_jit_write_protect_np != NULL) {
+        pthread_jit_write_protect_np(0);
+    }
 #endif
 
     memcpy(page->rw_buffer, code_bytes, length);
 
-#if defined(__APPLE__) && defined(__aarch64__) && defined(MAP_JIT)
-    // Toggle JIT write protection ON (Allow execution)
-    pthread_jit_write_protect_np(1);
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (pthread_jit_write_protect_np != NULL) {
+        pthread_jit_write_protect_np(1);
+    }
     
-    // Clear ARM64 Instruction Cache (ICache) for executed block
+    // Call Apple's official instruction cache clearing API
     sys_icache_invalidate(page->rx_buffer, length);
 #endif
 
