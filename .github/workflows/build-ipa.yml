@@ -41,6 +41,10 @@ jobs:
           # Patch Boxedwine: fix RamPage cast compilation error
           perl -pi -e 's/RAM_TYPE value = 0;/RAM_TYPE value = 0; RamPage() = default; template<typename T> explicit RamPage(T v) : value((RAM_TYPE)v) {}/g' Boxedwine/source/emulation/softmmu/soft_ram.h
           echo "Boxedwine patched: soft_ram.h RamPage constructors added"
+          
+          # Patch Boxedwine: fix missing GL types on iOS
+          perl -pi -e 's/#define __GLCOMMON_H__/#define __GLCOMMON_H__\n#include <GL\/glew.h>/g' Boxedwine/source/opengl/glcommon.h
+          echo "Boxedwine patched: glcommon.h includes GL/glew.h"
 
       - name: Generate Xcode Project via CMake
         run: |
