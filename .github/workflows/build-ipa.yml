@@ -31,7 +31,9 @@ jobs:
           
           # Patch SDL2: remove -Werror that breaks its own iOS source files
           sed -i '' 's/-Werror=declaration-after-statement/-Wno-error=declaration-after-statement/g' Boxedwine/lib/sdl2/CMakeLists.txt
-          echo "SDL2 patched: removed -Werror"
+          # Patch SDL2: add OBJC language so .m files compile correctly on iOS
+          sed -i '' 's/project(SDL2 C CXX)/project(SDL2 C CXX OBJC)/' Boxedwine/lib/sdl2/CMakeLists.txt
+          echo "SDL2 patched: -Werror removed, OBJC language added"
 
       - name: Generate Xcode Project via CMake
         run: |
