@@ -43,8 +43,8 @@ jobs:
           echo "Boxedwine patched: soft_ram.h RamPage constructors added"
           
           # Patch Boxedwine: fix missing GL types on iOS
-          perl -pi -e 's/#define __GLCOMMON_H__/#define __GLCOMMON_H__\n#include <GL\/glew.h>/g' Boxedwine/source/opengl/glcommon.h
-          echo "Boxedwine patched: glcommon.h includes GL/glew.h"
+          perl -pi -e 's/#define __GLCOMMON_H__/#define __GLCOMMON_H__\n#include <GL\/glew.h>\ntypedef unsigned short GLhalfNV;/g' Boxedwine/source/opengl/glcommon.h
+          echo "Boxedwine patched: glcommon.h includes GL/glew.h and GLhalfNV"
 
       - name: Generate Xcode Project via CMake
         run: |
