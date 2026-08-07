@@ -71,8 +71,8 @@ file(GLOB BW_PLAT_MAC_MM  "${BW_ROOT}/platform/mac/*.mm")
 # Bundled libraries
 file(GLOB_RECURSE BW_LIB_ASMJIT     "${BW_ROOT}/lib/asmjit/src/*.cpp")
 file(GLOB BW_LIB_ZLIB       "${BW_ROOT}/lib/zlib/*.c")
-file(GLOB_RECURSE BW_LIB_SFLOAT_C   "${BW_ROOT}/lib/softfloat/*.c")
-file(GLOB_RECURSE BW_LIB_SFLOAT_CPP "${BW_ROOT}/lib/softfloat/*.cpp")
+file(GLOB BW_LIB_SFLOAT_C   "${BW_ROOT}/lib/softfloat/source/*.c" "${BW_ROOT}/lib/softfloat/source/8086/*.c")
+file(GLOB BW_LIB_SFLOAT_CPP "${BW_ROOT}/lib/softfloat/source/*.cpp" "${BW_ROOT}/lib/softfloat/source/8086/*.cpp")
 file(GLOB         BW_LIB_PUGIXML    "${BW_ROOT}/lib/pugixml/src/*.cpp")
 file(GLOB_RECURSE BW_LIB_MESA       "${BW_ROOT}/lib/mesa/src/*.c")
 
