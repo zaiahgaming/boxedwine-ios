@@ -29,15 +29,6 @@ enable_language(OBJCXX)
 add_subdirectory(${SDL2_DIR} ${CMAKE_BINARY_DIR}/sdl2-build EXCLUDE_FROM_ALL)
 target_compile_options(SDL2-static PRIVATE -Wno-error)
 
-# Force all SDL2 .m files to compile as Objective-C
-# Must get source list from the target itself for Xcode generator
-get_target_property(_sdl2_sources SDL2-static SOURCES)
-foreach(_src ${_sdl2_sources})
-    if(_src MATCHES "\\.m$")
-        set_source_files_properties(${_src} PROPERTIES LANGUAGE OBJC)
-    endif()
-endforeach()
-
 # ==============================================================================
 # Gather Boxedwine engine sources
 # ==============================================================================
