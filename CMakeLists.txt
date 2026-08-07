@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(BoxedwineGame C CXX OBJC OBJCXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 
@@ -14,12 +14,13 @@ set(BW_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/Boxedwine)
 # Build SDL2 from bundled source for iOS
 # ==============================================================================
 set(SDL2_DIR ${BW_ROOT}/lib/sdl2)
+set(IOS TRUE CACHE BOOL "" FORCE)   # Tell SDL2 we're building for iOS
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_TEST OFF CACHE BOOL "" FORCE)
 set(SDL_HIDAPI OFF CACHE BOOL "" FORCE)
 set(SDL_JOYSTICK OFF CACHE BOOL "" FORCE)
-set(SDL_HAPTIC OFF CACHE BOOL "" FORCE)   # Depends on JOYSTICK
+set(SDL_HAPTIC OFF CACHE BOOL "" FORCE)
 set(SDL_SENSOR OFF CACHE BOOL "" FORCE)
 
 # Ensure OBJC language is enabled globally before SDL2 subdirectory
@@ -49,10 +50,17 @@ if(_TEST_SRCS)
     list(REMOVE_ITEM BW_ENGINE_CPP ${_TEST_SRCS})
 endif()
 
-# Remove Vulkan sources (not available on iOS in same way)
+# Remove Vulkan sources (not available on iOS)
 file(GLOB_RECURSE _VULKAN_SRCS "${BW_ROOT}/source/vulkan/*.cpp")
 if(_VULKAN_SRCS)
     list(REMOVE_ITEM BW_ENGINE_CPP ${_VULKAN_SRCS})
+endif()
+
+# Remove X11 sources (not used on macOS/iOS — Mac Xcode project excludes these)
+file(GLOB_RECURSE _X11_SRCS "${BW_ROOT}/source/x11/*.cpp" "${BW_ROOT}/source/x11/*.c")
+if(_X11_SRCS)
+    list(REMOVE_ITEM BW_ENGINE_CPP ${_X11_SRCS})
+    list(REMOVE_ITEM BW_ENGINE_C ${_X11_SRCS})
 endif()
 
 # Platform layers — macOS/iOS (POSIX) + SDL
@@ -127,28 +135,29 @@ target_include_directories(BoxedwineGame PRIVATE
     ${BW_ROOT}/lib/glew/include
     ${BW_ROOT}/lib/mesa/include
     ${SDL2_DIR}/include
-    ${CMAKE_BINARY_DIR}/sdl2-build/include  # Generated SDL config headers
+    ${CMAKE_BINARY_DIR}/sdl2-build/include
     ${CMAKE_CURRENT_SOURCE_DIR}/iOS
 )
 
 # ==============================================================================
 # Preprocessor Defines
-# Matches the Boxedwine Xcode mac project for ARM64 JIT, adapted for iOS
+# Matches the official Boxedwine Xcode project for ARM64, adapted for iOS
 # ==============================================================================
 target_compile_definitions(BoxedwineGame PRIVATE
     SIMDE_NO_NATIVE
     BOXEDWINE_64
     BOXEDWINE_ZLIB
     BOXEDWINE_POSIX
-    BOXEDWINE_MAC_JIT            # Enables ARM64 JIT via MAP_JIT on Apple Silicon
+    BOXEDWINE_MAC_JIT            # ARM64 JIT via MAP_JIT
     BOXEDWINE_DISABLE_UI         # No imgui — our UIKit is the frontend
     BOXEDWINE_IOS                # Our own iOS marker
-    BOXEDWINE_OPENGL_OSMESA      # Software OpenGL via mesa (no GPU GL on iOS)
+    BOXEDWINE_OPENGL_OSMESA      # Software OpenGL via mesa
+    BOXEDWINE_CORE_AUDIO         # CoreAudio on iOS
     ASMJIT_STATIC
-    ASMJIT_NO_X86                # ARM64 only, no x86 host
+    ASMJIT_NO_X86                # ARM64 only
     __MACOSX_CORE__
     SDL2=1
-    SDL_MAIN_HANDLED             # We provide our own main(), not SDL
+    SDL_MAIN_HANDLED             # We provide our own main()
 )
 
 # ==============================================================================
@@ -172,6 +181,7 @@ target_link_libraries(BoxedwineGame PRIVATE
     "-framework OpenGLES"
     "-framework CoreFoundation"
     "-framework Security"
+    "-framework CoreVideo"
 )
 
 # ==============================================================================
@@ -214,5 +224,5 @@ set_target_properties(BoxedwineGame PROPERTIES
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/iOS/BoxedwineApp.entitlements"
     XCODE_ATTRIBUTE_INFOPLIST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/iOS/Info.plist"
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
-    XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17"
+    XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++20"
 )
