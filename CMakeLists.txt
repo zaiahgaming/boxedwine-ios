@@ -66,7 +66,9 @@ endif()
 # Platform layers — macOS/iOS (POSIX) + SDL
 file(GLOB BW_PLAT_SDL   "${BW_ROOT}/platform/sdl/*.cpp")
 file(GLOB BW_PLAT_MAC_CPP "${BW_ROOT}/platform/mac/*.cpp")
+list(REMOVE_ITEM BW_PLAT_MAC_CPP "${BW_ROOT}/platform/mac/pixelformat.cpp")
 file(GLOB BW_PLAT_MAC_MM  "${BW_ROOT}/platform/mac/*.mm")
+list(REMOVE_ITEM BW_PLAT_MAC_MM "${BW_ROOT}/platform/mac/macOpenGL.mm")
 
 # Bundled libraries
 file(GLOB_RECURSE BW_LIB_ASMJIT     "${BW_ROOT}/lib/asmjit/src/*.cpp")
