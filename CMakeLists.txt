@@ -35,6 +35,15 @@ add_executable(BoxedwineGame WIN32 MACOSX_BUNDLE
     ${BOXEDWINE_SOURCES}
 )
 
+# Link iOS Native Frameworks (UIKit, AVFoundation, AudioToolbox, Foundation, CoreGraphics)
+target_link_libraries(BoxedwineGame PRIVATE
+    "-framework UIKit"
+    "-framework AVFoundation"
+    "-framework AudioToolbox"
+    "-framework Foundation"
+    "-framework CoreGraphics"
+)
+
 target_compile_options(BoxedwineGame PRIVATE
     -O3
     -ffast-math
