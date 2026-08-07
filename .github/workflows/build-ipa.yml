@@ -80,12 +80,17 @@ jobs:
 
       - name: Package IPA
         run: |
-          echo "=== Locating .app bundle ==="
-          APP_PATH=$(find build-ios -name "BoxedwineGame.app" -type d | head -1)
+          echo "=== Locating .app bundle containing binary ==="
+          EXEC_PATH=$(find build-ios -name "BoxedwineGame" -type f -perm +111 2>/dev/null || find build-ios -name "BoxedwineGame" -type f | head -1)
+          if [ -n "$EXEC_PATH" ]; then
+            APP_PATH=$(dirname "$EXEC_PATH")
+          else
+            APP_PATH=$(find build-ios -name "BoxedwineGame.app" -type d -not -empty | head -1)
+          fi
           
           if [ -z "$APP_PATH" ]; then
-            echo "ERROR: .app not found! Listing build-ios structure:"
-            find build-ios -type d -maxdepth 6
+            echo "ERROR: .app with binary not found! Listing build-ios structure:"
+            find build-ios -type f -name "BoxedwineGame*"
             exit 1
           fi
           
