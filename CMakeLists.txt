@@ -156,6 +156,8 @@ target_compile_definitions(BoxedwineGame PRIVATE
     BOXEDWINE_OPENGL_OSMESA      # Software OpenGL via mesa
     GLAPI=extern                 # Fix missing GLAPI on iOS
     GLAPIENTRY=                  # Fix missing GLAPIENTRY on iOS
+    APIENTRY=                    # Fix missing APIENTRY
+    GL_DEBUGPROC=GLDEBUGPROC     # Map GL_DEBUGPROC to GLDEBUGPROC just in case
     BOXEDWINE_CORE_AUDIO         # CoreAudio on iOS
     ASMJIT_STATIC
     ASMJIT_NO_X86                # ARM64 only
