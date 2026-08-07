@@ -17,7 +17,11 @@ set(SDL2_DIR ${BW_ROOT}/lib/sdl2)
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_TEST OFF CACHE BOOL "" FORCE)
+set(SDL_HIDAPI OFF CACHE BOOL "" FORCE)  # iOS hid.m has C99 issues with -Werror
+set(SDL_JOYSTICK OFF CACHE BOOL "" FORCE) # Not needed, avoids iOS MFi issues
 add_subdirectory(${SDL2_DIR} ${CMAKE_BINARY_DIR}/sdl2-build EXCLUDE_FROM_ALL)
+# Disable -Werror for SDL2 (old code has harmless warnings)
+target_compile_options(SDL2-static PRIVATE -Wno-error)
 
 # ==============================================================================
 # Gather Boxedwine engine sources
