@@ -75,8 +75,7 @@ jobs:
                      CODE_SIGNING_ALLOWED=NO \
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGN_IDENTITY="" \
-                     DEVELOPMENT_TEAM="" \
-                     2>&1 | tail -100
+                     DEVELOPMENT_TEAM=""
 
       - name: Package IPA
         run: |
