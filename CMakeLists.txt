@@ -24,6 +24,10 @@ set(SDL_SENSOR OFF CACHE BOOL "" FORCE)
 add_subdirectory(${SDL2_DIR} ${CMAKE_BINARY_DIR}/sdl2-build EXCLUDE_FROM_ALL)
 target_compile_options(SDL2-static PRIVATE -Wno-error)
 
+# Force all SDL2 .m files to compile as Objective-C (CMake Xcode generator bug)
+file(GLOB_RECURSE SDL2_OBJC_FILES "${SDL2_DIR}/src/*.m")
+set_source_files_properties(${SDL2_OBJC_FILES} PROPERTIES LANGUAGE OBJC)
+
 # ==============================================================================
 # Gather Boxedwine engine sources
 # ==============================================================================
