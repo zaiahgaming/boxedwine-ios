@@ -21,12 +21,22 @@ set(SDL_HIDAPI OFF CACHE BOOL "" FORCE)
 set(SDL_JOYSTICK OFF CACHE BOOL "" FORCE)
 set(SDL_HAPTIC OFF CACHE BOOL "" FORCE)   # Depends on JOYSTICK
 set(SDL_SENSOR OFF CACHE BOOL "" FORCE)
+
+# Ensure OBJC language is enabled globally before SDL2 subdirectory
+enable_language(OBJC)
+enable_language(OBJCXX)
+
 add_subdirectory(${SDL2_DIR} ${CMAKE_BINARY_DIR}/sdl2-build EXCLUDE_FROM_ALL)
 target_compile_options(SDL2-static PRIVATE -Wno-error)
 
-# Force all SDL2 .m files to compile as Objective-C (CMake Xcode generator bug)
-file(GLOB_RECURSE SDL2_OBJC_FILES "${SDL2_DIR}/src/*.m")
-set_source_files_properties(${SDL2_OBJC_FILES} PROPERTIES LANGUAGE OBJC)
+# Force all SDL2 .m files to compile as Objective-C
+# Must get source list from the target itself for Xcode generator
+get_target_property(_sdl2_sources SDL2-static SOURCES)
+foreach(_src ${_sdl2_sources})
+    if(_src MATCHES "\\.m$")
+        set_source_files_properties(${_src} PROPERTIES LANGUAGE OBJC)
+    endif()
+endforeach()
 
 # ==============================================================================
 # Gather Boxedwine engine sources
