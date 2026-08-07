@@ -47,7 +47,7 @@ jobs:
       - name: Package Payload & Create .ipa File
         run: |
           mkdir -p Payload
-          cp -r build-ios/BoxedwineGame.xcarchive/Products/Applications/*.app Payload/
+          find build-ios/BoxedwineGame.xcarchive/ -name "*.app" -exec cp -r {} Payload/ \; || find build-ios/ -name "*.app" -exec cp -r {} Payload/ \;
           zip -r BoxedwineGame-Release.ipa Payload
 
       - name: Upload IPA Artifact
