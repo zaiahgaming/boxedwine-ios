@@ -11,19 +11,25 @@ jobs:
   build-ios-ipa:
     name: Build & Package iOS IPA
     runs-on: macos-14
+    timeout-minutes: 60
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
-      - name: Select Xcode Version
+      - name: Select Xcode
         run: |
           sudo xcode-select -switch /Applications/Xcode_15.4.app || sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-path
 
-      - name: Setup Build Directory & Run CMake
+      - name: Clone Boxedwine Engine
+        run: |
+          git clone --depth=1 https://github.com/danoon2/Boxedwine.git Boxedwine
+          echo "Boxedwine cloned. Source file count:"
+          find Boxedwine/source -name "*.cpp" | wc -l
+
+      - name: Generate Xcode Project via CMake
         run: |
           mkdir -p build-ios
           cd build-ios
@@ -31,28 +37,50 @@ jobs:
                 -DCMAKE_SYSTEM_NAME=iOS \
                 -DCMAKE_OSX_ARCHITECTURES=arm64 \
                 -DCMAKE_OSX_SYSROOT=iphoneos \
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
                 ..
 
-      - name: Build iOS Archive with Xcode
+      - name: Build iOS App
         run: |
           cd build-ios
-          xcodebuild archive \
+          xcodebuild build \
+                     -project BoxedwineGame.xcodeproj \
                      -scheme BoxedwineGame \
                      -configuration Release \
                      -sdk iphoneos \
-                     -archivePath BoxedwineGame.xcarchive \
+                     -derivedDataPath DerivedData \
                      CODE_SIGNING_ALLOWED=NO \
-                     CODE_SIGNING_REQUIRED=NO
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGN_IDENTITY="" \
+                     DEVELOPMENT_TEAM="" \
+                     2>&1 | tail -100
 
-      - name: Package Payload & Create .ipa File
+      - name: Package IPA
         run: |
+          echo "=== Locating .app bundle ==="
+          APP_PATH=$(find build-ios/DerivedData -name "BoxedwineGame.app" -type d | head -1)
+          
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: .app not found! Listing DerivedData structure:"
+            find build-ios/DerivedData -type d -maxdepth 6
+            exit 1
+          fi
+          
+          echo "Found: $APP_PATH"
+          echo "=== Binary check ==="
+          ls -la "$APP_PATH/BoxedwineGame" 2>/dev/null && file "$APP_PATH/BoxedwineGame" || echo "No binary found"
+          ls -la "$APP_PATH/"
+          
           mkdir -p Payload
-          find build-ios/BoxedwineGame.xcarchive/ -name "*.app" -exec cp -r {} Payload/ \; || find build-ios/ -name "*.app" -exec cp -r {} Payload/ \;
+          cp -r "$APP_PATH" Payload/
           zip -r BoxedwineGame-Release.ipa Payload
+          
+          echo "=== IPA Created ==="
+          ls -lh BoxedwineGame-Release.ipa
 
-      - name: Upload IPA Artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: BoxedwineGame-iOS-IPA
           path: BoxedwineGame-Release.ipa
-          retention-days: 14
+          retention-days: 30

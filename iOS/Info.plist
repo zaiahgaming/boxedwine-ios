@@ -2,7 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- Application Bundle Metadata -->
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
@@ -12,23 +11,19 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>Boxedwine Game</string>
+    <string>Boxedwine</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleVersion</key>
     <string>1</string>
-    
-    <!-- ============================================================ -->
-    <!-- MAXIMUM SYSTEM RESOURCE ALLOCATION (GAME CATEGORY)         -->
-    <!-- Declares app to iOS as a Game to enable iOS Game Mode,    -->
-    <!-- maximum CPU/GPU priorities, high refresh rates & performance -->
-    <!-- ============================================================ -->
+
+    <!-- iOS Game Mode: maximum CPU/GPU/memory priority -->
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.games</string>
 
-    <!-- Enable Apple GameController Framework for maximum gamepad / hardware input throughput -->
+    <!-- Game Controller Support -->
     <key>GCSupportsGameControllers</key>
     <true/>
     <key>GCSupportedGameControllers</key>
@@ -37,17 +32,9 @@
             <key>ProfileName</key>
             <string>ExtendedGamepad</string>
         </dict>
-        <dict>
-            <key>ProfileName</key>
-            <string>MicroGamepad</string>
-        </dict>
-        <dict>
-            <key>ProfileName</key>
-            <string>DirectionalGamepad</string>
-        </dict>
     </array>
 
-    <!-- Force Fullscreen & High Performance Rendering Modes -->
+    <!-- Display -->
     <key>UIRequiresFullScreen</key>
     <true/>
     <key>UIStatusBarHidden</key>
@@ -55,33 +42,31 @@
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
     
-    <!-- Disable Minimum Frame Duration to support ProMotion 120Hz Displays -->
+    <!-- ProMotion 120Hz -->
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
-    <key>CADisableMinimumFrameDuration</key>
-    <true/>
 
-    <!-- Orientation setup for full landscape desktop/game experience -->
+    <!-- All orientations (UI is portrait, games are landscape) -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
+        <string>UIInterfaceOrientationPortrait</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
     <key>UISupportedInterfaceOrientations~ipad</key>
     <array>
+        <string>UIInterfaceOrientationPortrait</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
-    <!-- Required Device Capabilities for High Performance -->
+    <!-- Required Device Capabilities (just ARM64) -->
     <key>UIRequiredDeviceCapabilities</key>
     <array>
         <string>arm64</string>
-        <string>metal</string>
-        <string>gamekit</string>
     </array>
 
-    <!-- Background Modes (Keep audio and game state persistent) -->
+    <!-- Background audio -->
     <key>UIBackgroundModes</key>
     <array>
         <string>audio</string>

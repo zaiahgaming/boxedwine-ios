@@ -1,6 +1,7 @@
 build/
 build-ios/
 build-linux/
+build-linux-exe/
 *.o
 *.a
 *.so
@@ -8,3 +9,5 @@ build-linux/
 *.ipa
 .DS_Store
 Boxedwine/
+Payload/
+DerivedData/
