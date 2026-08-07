@@ -37,6 +37,10 @@ jobs:
           sed -i '' '/PROPERTIES LANGUAGE C/d' Boxedwine/lib/sdl2/CMakeLists.txt
           sed -i '' '/FIXME: modern CMake/d' Boxedwine/lib/sdl2/CMakeLists.txt
           echo "SDL2 patched: -Werror removed, OBJC added, LANGUAGE C removed"
+          
+          # Patch Boxedwine: fix RamPage cast compilation error
+          perl -pi -e 's/RAM_TYPE value = 0;/RAM_TYPE value = 0; RamPage() = default; template<typename T> explicit RamPage(T v) : value((RAM_TYPE)v) {}/g' Boxedwine/source/emulation/softmmu/soft_ram.h
+          echo "Boxedwine patched: soft_ram.h RamPage constructors added"
 
       - name: Generate Xcode Project via CMake
         run: |
