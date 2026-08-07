@@ -4,15 +4,16 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
-#if defined(__APPLE__) && defined(__aarch64__)
-#include <pthread.h>
+#if defined(__APPLE__)
 #include <mach/mach.h>
 #include <mach/vm_map.h>
 #include <libkern/OSCacheControl.h>
 
-// Forward declaration / dlsym declaration for iOS pthread_jit_write_protect_np
-extern void pthread_jit_write_protect_np(int enabled) __attribute__((weak_import));
+// Dynamic function pointer type for runtime JIT write protect lookup on iOS/macOS
+typedef void (*pthread_jit_write_protect_np_func)(int enabled);
+static pthread_jit_write_protect_np_func g_pthread_jit_write_protect = NULL;
 #endif
 
 static int g_jit_initialized = 0;
@@ -21,6 +22,15 @@ int iOS_JIT_Initialize(void) {
     if (g_jit_initialized) return 0;
     
     printf("[iOS JIT Engine] Initializing On-Device ARM64 Dynarec JIT Engine...\n");
+    
+#if defined(__APPLE__)
+    // Dynamically resolve pthread_jit_write_protect_np at runtime to bypass iOS SDK compile-time availability warnings
+    g_pthread_jit_write_protect = (pthread_jit_write_protect_np_func)dlsym(RTLD_DEFAULT, "pthread_jit_write_protect_np");
+    if (g_pthread_jit_write_protect) {
+        printf("[iOS JIT Engine] pthread_jit_write_protect_np dynamically resolved successfully.\n");
+    }
+#endif
+
     g_jit_initialized = 1;
     return 0;
 }
@@ -61,20 +71,20 @@ iOSJITPage* iOS_JIT_AllocatePage(size_t size) {
 int iOS_JIT_EmitCode(iOSJITPage* page, const uint8_t* code_bytes, size_t length) {
     if (!page || !code_bytes || length > page->size) return -1;
     
-#if defined(__APPLE__) && defined(__aarch64__)
-    if (pthread_jit_write_protect_np != NULL) {
-        pthread_jit_write_protect_np(0);
+#if defined(__APPLE__)
+    if (g_pthread_jit_write_protect != NULL) {
+        g_pthread_jit_write_protect(0);
     }
 #endif
 
     memcpy(page->rw_buffer, code_bytes, length);
 
-#if defined(__APPLE__) && defined(__aarch64__)
-    if (pthread_jit_write_protect_np != NULL) {
-        pthread_jit_write_protect_np(1);
+#if defined(__APPLE__)
+    if (g_pthread_jit_write_protect != NULL) {
+        g_pthread_jit_write_protect(1);
     }
     
-    // Call Apple's official instruction cache clearing API
+    // Call Apple's instruction cache clearing API
     sys_icache_invalidate(page->rx_buffer, length);
 #endif
 
