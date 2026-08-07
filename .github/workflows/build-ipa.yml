@@ -81,11 +81,11 @@ jobs:
       - name: Package IPA
         run: |
           echo "=== Locating .app bundle ==="
-          APP_PATH=$(find build-ios/DerivedData -name "BoxedwineGame.app" -type d | head -1)
+          APP_PATH=$(find build-ios -name "BoxedwineGame.app" -type d | head -1)
           
           if [ -z "$APP_PATH" ]; then
-            echo "ERROR: .app not found! Listing DerivedData structure:"
-            find build-ios/DerivedData -type d -maxdepth 6
+            echo "ERROR: .app not found! Listing build-ios structure:"
+            find build-ios -type d -maxdepth 6
             exit 1
           fi
           
